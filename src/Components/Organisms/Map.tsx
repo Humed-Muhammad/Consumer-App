@@ -1,41 +1,55 @@
-import React, { useEffect } from 'react'
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import Container from '@Components/Atoms/Container'
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps"
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps"
 import { StyleSheet } from 'react-native'
 import { colors } from '@Utils/Color/colors'
 import Geolocation from "react-native-geolocation-service"
+import { getUserCurrentLocation } from '@Redux/Slices/PickUpSlice'
+import { createSelector } from "@reduxjs/toolkit"
+import { useDispatch, useSelector } from 'react-redux'
+import { requestGeolocationAccess } from '@Utils/PermissionRequestes';
+import store from '@Redux/store'
 
 
-const Map = ({ granted }) => {
 
-    useEffect(() => {
-        if (granted) {
-            Geolocation.getCurrentPosition(
-                (position) => {
-                    console.log(position);
-                },
-                (error) => {
-                    // See error code charts below.
-                    console.log(error.code, error.message);
-                },
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-            );
-        }
-    }, [])
 
+const Map = () => {
+    const dispatch = useDispatch()
+    const state = store.getState()
+
+    const pickupplace = () => state.pickup.pickupPlace
+
+    const selectCurrentLocation = createSelector(pickupplace, location => location);
+    const { currentLocation } = useSelector((state: any) => state.pickup.userLocations)
+
+    console.log(selectCurrentLocation(state))
     return (
         <Container direction="column" justify="flex-start" bg={colors.map} height="100%" width="100%">
             <MapView
                 zoomEnabled
                 style={styles.map}
                 provider={PROVIDER_GOOGLE}
-                initialRegion={{
-                    latitude: 37.78825,
-                    longitude: -122.4324,
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421,
+                onRegionChangeComplete={(region) => {
+                    console.log(region)
+                    dispatch(getUserCurrentLocation(region))
                 }}
-            />
+                region={{
+                    latitude: currentLocation.latitude,
+                    longitude: currentLocation.longitude,
+                    latitudeDelta: currentLocation.latitudeDelta || 0.021064477015438204,
+                    longitudeDelta: currentLocation.longitudeDelta || 0.02132675609124921,
+                }}
+                followsUserLocation={false}
+
+            >
+                {
+                    selectCurrentLocation(state).map(item => (
+                        <Marker
+                            coordinate={{ latitude: item.latitude, longitude: item.longitude }}
+                        />
+                    ))
+                }
+            </MapView>
 
         </Container>
     )
@@ -54,37 +68,3 @@ const styles = StyleSheet.create({
 });
 
 export default Map
-
-// import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'; // remove PROVIDER_GOOGLE import if not using Google Maps
-// import { View } from 'native-base'
-// import { StyleSheet } from 'react-native';
-// const styles = StyleSheet.create({
-//     container: {
-//         ...StyleSheet.absoluteFillObject,
-//         height: 400,
-//         width: 400,
-//         justifyContent: 'flex-end',
-//         alignItems: 'center',
-//     },
-//     map: {
-//         ...StyleSheet.absoluteFillObject,
-//     },
-// });
-
-// export default () => (
-//     <View style={styles.container}>
-//         <MapView
-//             provider={PROVIDER_GOOGLE} // remove if not using Google Maps
-//             style={styles.map}
-//             region={{
-//                 latitude: 37.78825,
-//                 longitude: -122.4324,
-//                 latitudeDelta: 0.015,
-//                 longitudeDelta: 0.0121,
-//             }}
-//         >
-//         </MapView>
-//     </View>
-// );
-
-

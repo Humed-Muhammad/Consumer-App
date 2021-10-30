@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { State } from "react-native-gesture-handler";
+
 
 
 const AccountSlice = createSlice({
@@ -22,11 +22,15 @@ const AccountSlice = createSlice({
         },
         changeProfileImage: (state, action) => {
             state.userProfileData["profileImage"] = action.payload;
-        }
+        },
+
     }
 })
 
 
-export const { loggeIn, changeProfileImage } = AccountSlice.actions
+export const {
+    loggeIn,
+    changeProfileImage,
+} = AccountSlice.actions
 
 export default AccountSlice.reducer

@@ -17,7 +17,7 @@ import { Formik } from 'formik'
 import BouncyCheckbox from 'react-native-bouncy-checkbox'
 import CardConatiner from '@Components/Atoms/CardContainer'
 import Text from '@Components/Atoms/Text'
-import { ScrollView } from 'native-base'
+import { ScrollView } from 'react-native'
 import { Icons } from '@Components/Atoms/Icons'
 import ModalView from '@Components/Organisms/Modal'
 import { colors } from "@Utils/Color/colors"
@@ -75,7 +75,7 @@ const Dropoff = ({ navigation }) => {
                                         }
                                     </Container>
                                     {/* <Input width="90%" radius="0px" borderWidth="0px" borderBottomWidth={1} onChangeText={handleChange("mainLocation")} onFoucs value={values.mainLocation} placeholder="Drop-off location" /> */}
-                                    <GooglePlacesInput />
+                                    <GooglePlacesInput top={null} />
                                     <Input width="85%" radius="0px" borderWidth="0px" borderBottomWidth={1} onChangeText={handleChange("specificLocaiton")} value={values.specificLocaiton} placeholder="Specific drop-off location" />
                                     <Container padd="0px" width="90%" justify="flex-start">
                                         <Button width="50px" height="30px" onPress={handleSubmit} text="Add" />

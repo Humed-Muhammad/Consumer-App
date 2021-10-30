@@ -12,7 +12,7 @@ const VehicleCard = ({ index, item, handleClick }) => {
 
     return (
         <TouchableHighlight underlayColor={colors.white} onPress={() => handleClick(index)} >
-            <CardConatiner borderTopWidth={item.status && "3px"} borderColor={item.status && colors.gray} padd="10px" justify="space-around" width="220px" height="90px">
+            <CardConatiner borderTopWidth={item.status && "3px"} borderColor={item.status && colors.gray} padd="10px" justify="space-around" width="130px" height="90px">
                 <Image width={100} source={{
                     uri: `${item.uri}`,
                 }} />

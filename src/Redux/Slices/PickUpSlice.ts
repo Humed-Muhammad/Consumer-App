@@ -14,7 +14,16 @@ const PickupSllice = createSlice({
         pickupPlace: [
 
         ],
-        vehicleId: ""
+        vehicleId: "",
+        userLocations: {
+            currentLocation: {
+                latitude: 8.9950409,
+                longitude: 38.7850037,
+                latitudeDelta: 0.021064477015438204,
+                longitudeDelta: 0.02132675609124921,
+            },
+            selectedLocations: []
+        }
     },
     reducers: {
         pickupToogleModal: (state) => {
@@ -45,11 +54,23 @@ const PickupSllice = createSlice({
         },
         pickupRemovePickupPlace: (state, action) => {
             state.pickupPlace.splice(action.payload, 1)
+        },
+        getUserCurrentLocation: (state, action) => {
+            state.userLocations.currentLocation = action.payload
+        },
+        addSelectedLocation: (state, action) => {
+            state.userLocations.selectedLocations.push(action.payload)
+        },
+        removeSelectedLocation: (state, action) => {
+            state.userLocations.selectedLocations.splice(action.payload, 1)
         }
     }
 })
 export const {
     pickupToogleModal,
+    getUserCurrentLocation,
+    addSelectedLocation,
+    removeSelectedLocation,
     pickupAddPickupPlace,
     pickupChangeIconStatus,
     pickupRemovePickupPlace,

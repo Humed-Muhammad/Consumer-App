@@ -1,7 +1,6 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-// import { NativeBaseProvider } from 'native-base';
 import { DrawerNavigation as Authenticated } from '@Navigation/DrawerNavigation'
 import { NonAuthenticatedStackNavigation as NonAuthenticated } from '@Navigation/NonAuthenticatedStackNavigation'
 import { Provider, useSelector } from 'react-redux';

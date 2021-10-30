@@ -1,12 +1,12 @@
 import CardConatiner from '@Components/Atoms/CardContainer'
 import Container from '@Components/Atoms/Container'
 import Text from '@Components/Atoms/Text'
-import { ScrollView } from 'native-base'
 import { colors } from '@Utils/Color/colors'
 import React from 'react'
 import { Icons } from '@Components/Atoms/Icons'
 import { justifyContent } from 'styled-system'
 import Button from '@Components/Atoms/Button'
+import { ScrollView } from 'react-native'
 
 const Reports = () => {
     return (

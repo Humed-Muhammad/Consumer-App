@@ -7,7 +7,6 @@ import ModalView from '@Components/Organisms/Modal'
 import Text from '@Components/Atoms/Text'
 import Input from '@Components/Atoms/Inputs'
 import Button from '@Components/Atoms/Button'
-import Dropdown from "../Components/Organisms/Dropdown"
 import { toogleReport } from '@Redux/Slices/ReportSlice'
 
 
@@ -74,7 +73,6 @@ const OrderList = () => {
                 {list}
             </ScrollView>
             {report.status && <ModalView onPress={() => dispatch(toogleReport())} justify="space-around" height="60%" width="90%" status={report.status} >
-                <Dropdown placeholder="Select report type" />
                 <Input width="80%" height="50%" placeholder="Additional information" />
                 <Button text="Submit" width="80%" />
             </ModalView>}

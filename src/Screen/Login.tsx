@@ -11,7 +11,7 @@ import { Formik } from "formik"
 import * as yup from "yup"
 import FormError from '@Components/Organisms/FormError'
 import Logo from '@Components/Organisms/Logo'
-// import { Input } from 'native-base'
+
 
 const Login = ({ navigation }: any) => {
 

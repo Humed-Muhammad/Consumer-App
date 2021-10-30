@@ -8,8 +8,17 @@ import { colors } from "@Utils/Color/colors";
 import { ScrollView } from "react-native-gesture-handler";
 import Navbar from "@Components/Organisms/Navbar";
 import { Icons } from "@Components/Atoms/Icons";
-// import Dropdown from "@Components/Organisms/Dropdown";
 
+const style = {
+    backgroundColor: colors.gray,
+    height: 55,
+    width: 55,
+    borderRadius: 50,
+    margin: 10,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
+}
 
 const Drawer = createDrawerNavigator();
 
@@ -22,7 +31,8 @@ const screens = screenList.map(({ name, component, Icon, title }: any, index) =>
         component={component}
         options={{
             drawerIcon: () => <Icon size={30} name={iconNames[index]} />,
-            header: ({ navigation }) => <Navbar name={name} navigation={navigation} title={name} />
+            header: ({ navigation }) => name != "Home" ? <Navbar name={name} navigation={navigation} title={name} /> : <Icons style={style} onPress={() => navigation.openDrawer()} color={colors.white} name="menu" size={40} />,
+            headerTransparent: true
         }}
     />
 ))

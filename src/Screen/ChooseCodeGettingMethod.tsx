@@ -4,7 +4,7 @@ import Container from '@Components/Atoms/Container'
 import { colors } from '@Utils/Color/colors'
 import Text from '@Components/Atoms/Text'
 import Logo from '@Components/Organisms/Logo'
-import { Radio } from 'native-base'
+// import { Radio } from 'native-base'
 
 
 const ChooseMethod = ({ navigation }: any) => {
@@ -17,7 +17,7 @@ const ChooseMethod = ({ navigation }: any) => {
             <Container direction="column" justify="space-evenly" bg={colors.white} height="50%">
                 <Text fontWeight="bold" fontSize="20px">How do you want to rest your password?</Text>
                 <Container direction="column">
-                    <Radio.Group
+                    {/* <Radio.Group
                         name="myRadioGroup"
                         value={value}
                         onChange={(nextValue) => {
@@ -30,7 +30,7 @@ const ChooseMethod = ({ navigation }: any) => {
                         <Radio value="two" my={1}>
                             Send SMS to 09****03
                         </Radio>
-                    </Radio.Group>
+                    </Radio.Group> */}
                 </Container>
                 <Button onPress={() => navigation.navigate("Verify")} width="90%" text="Find" />
             </Container>
