@@ -1,28 +1,21 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import React from 'react'
 import Container from '@Components/Atoms/Container'
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps"
 import { StyleSheet } from 'react-native'
 import { colors } from '@Utils/Color/colors'
-import Geolocation from "react-native-geolocation-service"
 import { getUserCurrentLocation } from '@Redux/Slices/PickUpSlice'
-import { createSelector } from "@reduxjs/toolkit"
-import { useDispatch, useSelector } from 'react-redux'
-import { requestGeolocationAccess } from '@Utils/PermissionRequestes';
-import store from '@Redux/store'
+import { useAppSelector, useAppDispatch } from "@Redux/Hooks"
+import { dropoffPlaces, pickupPlaces } from "@Redux/memorizedSelector"
 
 
 
 
 const Map = () => {
-    const dispatch = useDispatch()
-    const state = store.getState()
+    const dispatch = useAppDispatch()
+    const { currentLocation } = useAppSelector((state: any) => state.pickup.userLocations)
+    const pickup = useAppSelector(pickupPlaces)
+    const dropoff = useAppSelector(dropoffPlaces)
 
-    const pickupplace = () => state.pickup.pickupPlace
-
-    const selectCurrentLocation = createSelector(pickupplace, location => location);
-    const { currentLocation } = useSelector((state: any) => state.pickup.userLocations)
-
-    console.log(selectCurrentLocation(state))
     return (
         <Container direction="column" justify="flex-start" bg={colors.map} height="100%" width="100%">
             <MapView
@@ -43,9 +36,23 @@ const Map = () => {
 
             >
                 {
-                    selectCurrentLocation(state).map(item => (
+                    pickup.map((item, index) => (
                         <Marker
+                            key={index}
                             coordinate={{ latitude: item.latitude, longitude: item.longitude }}
+                            image={{ uri: "https://img.icons8.com/ios-filled/100/000000/marker-p.png" }}
+
+                        />
+                    ))
+
+                }
+                {
+                    dropoff.map((item, index) => (
+                        <Marker
+                            key={index}
+                            coordinate={{ latitude: item.latitude, longitude: item.longitude }}
+                            image={{ uri: "https://img.icons8.com/ios-filled/100/000000/marker-d.png" }}
+
                         />
                     ))
                 }
@@ -54,6 +61,7 @@ const Map = () => {
         </Container>
     )
 }
+
 
 const styles = StyleSheet.create({
 

@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import Container from "@Components/Atoms/Container"
 import PickupLocation from "@Components/Organisms/PickupLocation"
 import VehicleCard from "@Components/Organisms/VehicleCard"
-import { ScrollView } from "react-native"
+import { Alert, AlertButton, ScrollView } from "react-native"
 import Button from "@Components/Atoms/Button"
 import Map from "@Components/Organisms/Map"
 import { useDispatch, useSelector } from "react-redux"
@@ -21,19 +21,17 @@ import { dropoffChangeIsChecked } from "@Redux/Slices/DropoffSlice"
 import GooglePlace from "@Components/Organisms/GooglePlace"
 import * as yup from "yup"
 import FormError from "@Components/Organisms/FormError"
+import { useAppDispatch, useAppSelector } from "@Redux/Hooks"
+import { dropoffPlaces, pickupPlaces } from "@Redux/memorizedSelector"
 
 
 
 const Pickup = ({ navigation }) => {
     let [isSender, setIsSender] = useState(false)
 
-    let [senderData, setSenderData]: any = useState({ senderName: "", senderPhone: "" })
+    let [value, setvalue]: any = useState({ senderName: "", senderPhone: "" })
     let [vehicle, setVehicle]: any = useState("")
-    let [from, setFrom]: any = useState({
-        latitude: "",
-        longitude: "",
-        mainLocation: "",
-    })
+    let [from, setFrom]: any = useState({})
     let [vehicleList, setVehicleList] = useState([
         {
             uri: "https://images.unsplash.com/photo-1471466054146-e71bcc0d2bb2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1470&q=80",
@@ -70,8 +68,9 @@ const Pickup = ({ navigation }) => {
         setVehicleList(newvehicleList)
     }
 
-    const dispatch = useDispatch()
-    const { pickupPlace } = useSelector((state: any) => state.pickup)
+    const dispatch = useAppDispatch()
+    const pickupPlace = useAppSelector(pickupPlaces)
+
     const { pickupIsChecked } = useSelector((state: any) => state.pickup.status)
     const { sender } = useSelector((state: any) => state.pickup)
     const { vehicleId } = useSelector((state: any) => state.pickup)
@@ -87,19 +86,35 @@ const Pickup = ({ navigation }) => {
     })
 
     const validationSchema = yup.object().shape({
-        senderName: yup.string().required(),
-        senderPhone: yup.number().min(10).max(10).required(),
+        name: yup.string().required(),
+        phone: yup.number().min(10).required(),
     })
 
     console.log(from)
 
-    const handleSubmit = () => {
-        dispatch(pickupChangeIconStatus())
-        dispatch(pickupAddPickupPlace(from))
-        if (pickupIsChecked) {
-            dispatch(handlePickupSender(senderData))
+    const handleSubmit = (values) => {
+        if (from.latitude) {
+            dispatch(pickupChangeIconStatus())
+            dispatch(pickupAddPickupPlace(from))
+            if (pickupIsChecked) {
+                dispatch(handlePickupSender(values))
+            } else {
+                dispatch(handlePickupSender({ senderName: "client", senderPhone: "client" }))
+            }
+            setFrom({})
         } else {
-            dispatch(handlePickupSender({ senderName: "client", senderPhone: "client" }))
+            Alert.alert(
+                "Pickup location",
+                "Please add a pickup location...",
+                [
+                    {
+                        text: "Cancel",
+                        onPress: () => console.log("Cancel Pressed"),
+                        style: "cancel"
+                    },
+                    { text: "OK", onPress: () => console.log("OK Pressed") }
+                ]
+            )
         }
     }
 
@@ -109,11 +124,11 @@ const Pickup = ({ navigation }) => {
             <Container direction="column" position="absolute" bottom="0px">
 
                 <Formik
-                    initialValues={{ mainLocation: "", specificLocaiton: "", senderName: "", senderPhone: "", }}
-                    onSubmit={values => handleSubmit()}
+                    initialValues={{ name: "", phone: "", }}
+                    onSubmit={values => handleSubmit(values)}
                     validationSchema={pickupIsChecked && validationSchema}
                 >
-                    {({ handleSubmit, handleChange, values, errors, touched }) => (
+                    {({ handleSubmit, handleChange, values, errors, touched }: any) => (
                         <>
                             {
                                 pickupPlace.length == 0 && (
@@ -129,16 +144,13 @@ const Pickup = ({ navigation }) => {
                                             {
                                                 isSender && (<Container>
                                                     <Container width="50%" direction="column">
-                                                        <Input onChangeText={(text) => setSenderData({ ...senderData, senderName: text })} radius="0px" borderWidth="0px" borderBottomWidth={1} placeholder="Full name" width="100%" />
-                                                        <FormError error={errors.senderName} touched={touched.senderName} />
+                                                        <Input onChangeText={handleChange("name")} radius="0px" borderWidth="0px" borderBottomWidth={1} placeholder="Full name" width="100%" />
+                                                        <FormError error={errors.name} touched={touched.name} />
 
                                                     </Container>
                                                     <Container width="50%" direction="column">
-                                                        <Input keyboardType="numeric" onChangeText={(text) => {
-                                                            setSenderData({ ...senderData, senderPhone: text })
-                                                            handleChange("senderPhone")
-                                                        }} radius="0px" borderWidth="0px" borderBottomWidth={1} placeholder="Phone number" width="100%" />
-                                                        <FormError error={errors.senderPhone} touched={touched.senderPhone} />
+                                                        <Input onChangeText={handleChange("phone")} keyboardType="numeric" radius="0px" borderWidth="0px" borderBottomWidth={1} placeholder="Phone number" width="100%" />
+                                                        <FormError error={errors.phone} touched={touched.phone} />
                                                     </Container>
                                                 </Container>)
                                             }
@@ -154,7 +166,7 @@ const Pickup = ({ navigation }) => {
                             }
 
 
-                            <PickupLocation setFrom={setFrom} setIsSender={setIsSender} text="I am not the sender" />
+                            <PickupLocation from={from} setFrom={setFrom} setIsSender={setIsSender} text="I am not the sender" />
                             <ScrollView horizontal={true}>
                                 {
                                     Vehicles
@@ -162,15 +174,14 @@ const Pickup = ({ navigation }) => {
                             </ScrollView>
                             <Container justify="space-around" >
                                 <Button onPress={() => navigation.navigate("Root")} text="Back" width="45%" />
-                                <Button disabled={true} bg={colors.secondary} onPress={() => {
-                                    dispatch(pickupChangeIconStatus())
-                                    dispatch(pickupAddPickupPlace({ mainLocation: values.mainLocation, specificLocaiton: values.specificLocaiton }))
-                                    if (pickupIsChecked) {
-                                        dispatch(handlePickupSender({ senderName: values.senderName, senderPhone: values.senderPhone }))
-                                    } else {
-                                        dispatch(handlePickupSender({ senderName: "Humed", senderPhone: "0912974103" }))
+                                <Button bg={colors.secondary} onPress={() => {
+                                    if (pickupPlace.length == 0) {
+
+                                        handleSubmit(values)
+                                        if (from.latitude) {
+                                            navigation.navigate("Drop-off")
+                                        }
                                     }
-                                    navigation.navigate("Drop-off")
                                 }} text="Next" width="45%" />
                             </Container>
                         </>

@@ -11,24 +11,27 @@ import {
     removeDropoffPlace,
     dropoffToogleModal,
     dropoffChangeIsChecked,
-    addReceiver
+    addReceiver,
+    removeReceiver
 } from '@Redux/Slices/DropoffSlice'
 import { Formik } from 'formik'
 import BouncyCheckbox from 'react-native-bouncy-checkbox'
 import CardConatiner from '@Components/Atoms/CardContainer'
 import Text from '@Components/Atoms/Text'
-import { ScrollView } from 'react-native'
+import { Alert, ScrollView } from 'react-native'
 import { Icons } from '@Components/Atoms/Icons'
 import ModalView from '@Components/Organisms/Modal'
 import { colors } from "@Utils/Color/colors"
 import CheckboxInputs from "@Components/Organisms/CheckboxInputs"
 import NonCheckboxInputs from "@Components/Organisms/NonCheckboxInputs"
 import GooglePlacesInput from '@Components/Organisms/GooglePlace'
+import * as yup from "yup"
 
 
 
 const Dropoff = ({ navigation }) => {
     const [isReceiver, setIsReceiver] = useState(false)
+    let [to, setTo]: any = useState({})
     const dispatch = useDispatch();
     const { dropoffPlace } = useSelector((state: any) => state.dropoff)
     const { receiver } = useSelector((state: any) => state.dropoff)
@@ -44,6 +47,58 @@ const Dropoff = ({ navigation }) => {
         zIndex: 100
     }
 
+    const handleSubmit = (values) => {
+        if (to.latitude) {
+            dispatch(addDropoffPlace(to))
+            if (!dropoffIsChecked) {
+                dispatch(addReceiver(values))
+            } else {
+                dispatch(addReceiver({ name: "Ahmed", phone: "0913452000" }))
+            }
+            console.log(values)
+            setTo({})
+        }
+        else {
+            Alert.alert(
+                "Dropoff location",
+                "Please add a dropoff location...",
+                [
+                    {
+                        text: "Cancel",
+                        onPress: () => console.log("Cancel Pressed"),
+                        style: "cancel"
+                    },
+                    { text: "OK", onPress: () => console.log("OK Pressed") }
+                ]
+            )
+        }
+    }
+    const handleModalSubmit = (values) => {
+        if (to.latitude) {
+            dispatch(addDropoffPlace(to))
+            dispatch(addReceiver(values))
+            dispatch(dropoffToogleModal())
+            setTo({})
+        } else {
+            Alert.alert(
+                "Dropoff location",
+                "Please add a dropoff location...",
+                [
+                    {
+                        text: "Cancel",
+                        onPress: () => console.log("Cancel Pressed"),
+                        style: "cancel"
+                    },
+                    { text: "OK", onPress: () => console.log("OK Pressed") }
+                ]
+            )
+        }
+    }
+    const validationSchema = yup.object().shape({
+        name: yup.string().required(),
+        phone: yup.number().min(10).required(),
+    })
+
     return (
         <Container height="100%" width="100%">
             <Map />
@@ -51,32 +106,24 @@ const Dropoff = ({ navigation }) => {
                 {
                     dropoffPlace.length == 0 && (
                         <Formik
-                            initialValues={{ mainLocation: "", specificLocaiton: "", receiverName: "", receiverPhone: "" }}
-                            onSubmit={values => {
-                                dispatch(addDropoffPlace({ mainLocation: values.mainLocation, specificLocaiton: values.specificLocaiton }))
-                                if (!dropoffIsChecked) {
-                                    dispatch(addReceiver({ receiverName: values.receiverName, receiverPhone: values.receiverPhone }))
-                                } else {
-                                    dispatch(addReceiver({ receiverName: "Ahmed", receiverPhone: "0913452000" }))
-                                }
-                                console.log(values)
-                            }}
+                            initialValues={{ name: "", phone: "" }}
+                            onSubmit={values => { handleSubmit(values) }}
+                            validationSchema={validationSchema}
                         >
-                            {({ handleSubmit, handleChange, values, errors }) => (
+                            {({ handleSubmit, handleChange, values, errors, touched }) => (
 
                                 <>
                                     <Container justify="flex-start" width="85%">
                                         {
                                             dropoffIsChecked ? (
-                                                <CheckboxInputs handleChange={handleChange} text="I am not the receiver" />
+                                                <CheckboxInputs keyboardType="numeric" errors={errors} touched={touched} handleChange={handleChange} text="I am not the receiver" />
                                             ) : (
-                                                <NonCheckboxInputs handleChange={handleChange} />
+                                                <NonCheckboxInputs errors={errors} touched={touched} keyboardType="numeric" handleChange={handleChange} />
                                             )
                                         }
                                     </Container>
-                                    {/* <Input width="90%" radius="0px" borderWidth="0px" borderBottomWidth={1} onChangeText={handleChange("mainLocation")} onFoucs value={values.mainLocation} placeholder="Drop-off location" /> */}
-                                    <GooglePlacesInput top={null} />
-                                    <Input width="85%" radius="0px" borderWidth="0px" borderBottomWidth={1} onChangeText={handleChange("specificLocaiton")} value={values.specificLocaiton} placeholder="Specific drop-off location" />
+                                    <GooglePlacesInput from={to} setFrom={setTo} top={null} />
+                                    <Input width="85%" radius="0px" borderWidth="0px" borderBottomWidth={1} onChangeText={(text) => setTo({ ...to, specificLocation: text })} placeholder="Specific drop-off location" />
                                     <Container padd="0px" width="90%" justify="flex-start">
                                         <Button width="50px" height="30px" onPress={handleSubmit} text="Add" />
                                     </Container>
@@ -94,9 +141,15 @@ const Dropoff = ({ navigation }) => {
                                     <ScrollView horizontal>
                                         {
                                             dropoffPlace && dropoffPlace.map((item, index) => (
-                                                <CardConatiner padd="10px" key={index} bg={colors.gray} justify="space-around" height="90%" width="100px">
-                                                    <Text color={colors.white} key={index} fontSize="12px" fontWeight="bold" >{item && item.mainLocation}</Text>
-                                                    <Icons style={null} onPress={() => dispatch(removeDropoffPlace(index))} color={colors.white} size={17} name="close" />
+                                                <CardConatiner padd="10px" key={index} bg={colors.gray} justify="space-around" height="90%" width="170px">
+                                                    <ScrollView horizontal>
+                                                        <Text color={colors.white} key={index} fontSize="12px" fontWeight="bold" >{item && item.mainLocation}</Text>
+                                                    </ScrollView>
+                                                    <Icons style={null} onPress={() => {
+                                                        dispatch(removeDropoffPlace(index))
+                                                        dispatch(removeReceiver(index))
+                                                        setTo({})
+                                                    }} color={colors.white} size={17} name="close" />
                                                 </CardConatiner>
                                             ))
                                         }
@@ -115,27 +168,27 @@ const Dropoff = ({ navigation }) => {
 
                     {dropoffModalStatus && <ModalView justify="flex-start" height="100%" width="100%" status={dropoffModalStatus.status} onPress={() => dispatch(dropoffToogleModal())}>
                         <Formik
-                            initialValues={{ mainLocation: "", specificLocaiton: "" }}
+                            initialValues={{ name: "", phone: "" }}
                             onSubmit={(values) => {
-                                dispatch(addDropoffPlace(values))
-                                dispatch(dropoffToogleModal())
+                                handleModalSubmit(values)
                             }}
+                            validationSchema={validationSchema}
                         >
-                            {({ handleSubmit, values, handleChange }) => (
+                            {({ handleSubmit, values, handleChange, errors, touched }) => (
                                 <Container height="100%" direction="column">
                                     <Container padd="10px" direction="column" justify="space-between" align="flex-start" width="90%" >
                                         {
                                             dropoffIsChecked ? (
-                                                <CheckboxInputs handleChange={handleChange} text="I am not the receiver" />
+                                                <CheckboxInputs keyboardType="numeric" errors={errors} touched={touched} handleChange={handleChange} text="I am not the receiver" />
                                             ) : (
-                                                <NonCheckboxInputs handleChange={handleChange} />
+                                                <NonCheckboxInputs errors={errors} touched={touched} keyboardType="numeric" handleChange={handleChange} />
                                             )
                                         }
                                     </Container>
-                                    {/* <Input width="85%" radius="0px" borderWidth="0px" borderBottomWidth={1} onChangeText={handleChange("mainLocation")} onFoucs value={values.mainLocation} placeholder="Drop-off location" /> */}
+
                                     <Container height="200px" direction="column">
-                                        <GooglePlacesInput />
-                                        <Input width="85%" radius="0px" borderWidth="0px" borderBottomWidth={1} onChangeText={handleChange("specificLocaiton")} value={values.specificLocaiton} placeholder="Specific drop-off location" />
+                                        <GooglePlacesInput from={to} setFrom={setTo} top={50} />
+                                        <Input width="85%" radius="0px" borderWidth="0px" borderBottomWidth={1} onChangeText={text => setTo({ ...to, specificLocation: text })} placeholder="Specific drop-off location" />
                                     </Container>
                                     <Container padd="0px" width="90%" justify="flex-end">
                                         <Button width="50px" height="30px" onPress={handleSubmit} text="Add" />
@@ -148,7 +201,11 @@ const Dropoff = ({ navigation }) => {
                 </Container>
                 <Container justify="space-around" >
                     <Button onPress={() => navigation.navigate("Pickup")} text="Back" width="45%" />
-                    <Button bg={colors.secondary} onPress={() => navigation.navigate("")} text="Next" width="45%" />
+                    <Button bg={colors.secondary} onPress={() => {
+                        if (dropoffPlace.length > 0) {
+                            navigation.navigate("summery")
+                        }
+                    }} text="Next" width="45%" />
                 </Container>
 
 

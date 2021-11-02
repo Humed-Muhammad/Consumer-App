@@ -48,11 +48,13 @@ const GooglePlacesInput = ({ top, from, setFrom }) => {
             }}
             onPress={(data, { geometry }) => {
 
-                setFrom({
-                    latitude: geometry.location.lat,
-                    longitude: geometry.location.lng,
-                    mainLocation: data.description,
-                })
+                if (data && geometry) {
+                    setFrom({
+                        latitude: geometry.location.lat,
+                        longitude: geometry.location.lng,
+                        mainLocation: data.description,
+                    })
+                }
                 console.log("geom " + JSON.stringify(geometry.location))
             }}
             textInputProps={{

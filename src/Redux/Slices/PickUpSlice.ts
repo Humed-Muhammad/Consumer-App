@@ -50,10 +50,16 @@ const PickupSllice = createSlice({
             state.vehicleId = action.payload
         },
         pickupAddPickupPlace: (state, action) => {
-            state.pickupPlace.push(action.payload)
+            const newState = [...state.pickupPlace, action.payload]
+            state.pickupPlace = newState;
+
+            Object.assign(state.pickupPlace, newState)
+
         },
         pickupRemovePickupPlace: (state, action) => {
-            state.pickupPlace.splice(action.payload, 1)
+            const newState = [...state.pickupPlace]
+            newState.splice(action.payload, 1)
+            state.pickupPlace = newState
         },
         getUserCurrentLocation: (state, action) => {
             state.userLocations.currentLocation = action.payload

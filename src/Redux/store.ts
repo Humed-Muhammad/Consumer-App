@@ -5,7 +5,7 @@ import pickup from "@Redux/Slices/PickUpSlice"
 import account from "@Redux/Slices/AccountSlice"
 import dropoff from "@Redux/Slices/DropoffSlice"
 
-export default configureStore({
+export const store = configureStore({
     reducer: {
         color,
         report,
@@ -14,3 +14,7 @@ export default configureStore({
         dropoff,
     }
 })
+
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

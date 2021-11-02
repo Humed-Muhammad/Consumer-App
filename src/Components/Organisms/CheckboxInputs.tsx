@@ -3,8 +3,9 @@ import Container from '@Components/Atoms/Container'
 import Input from '@Components/Atoms/Inputs'
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { colors } from '@Utils/Color/colors';
+import FormError from './FormError';
 
-const Sender = ({ text, handleChange }) => {
+const Sender = ({ text, handleChange, errors, touched, keyboardType }) => {
     let [isSender, setIsSender] = useState(false)
     return (
         <Container direction="column" width="100%" >
@@ -13,8 +14,14 @@ const Sender = ({ text, handleChange }) => {
             </Container>
             {
                 isSender && (<Container>
-                    <Input onChangeText={handleChange("receiverName")} radius="0px" borderWidth="0px" borderBottomWidth={1} placeholder="Full name" width="50%" />
-                    <Input onChangeText={handleChange("receiverPhone")} radius="0px" borderWidth="0px" borderBottomWidth={1} placeholder="Phone number" width="50%" />
+                    <Container width="50%" direction="column">
+                        <Input onChangeText={handleChange("name")} radius="0px" borderWidth="0px" borderBottomWidth={1} placeholder="Full name" width="100%" />
+                        <FormError error={errors.name} touched={touched.name} />
+                    </Container>
+                    <Container width="50%" direction="column">
+                        <Input keyboardType={keyboardType} onChangeText={handleChange("phone")} radius="0px" borderWidth="0px" borderBottomWidth={1} placeholder="Phone number" width="100%" />
+                        <FormError error={errors.phone} touched={touched.phone} />
+                    </Container>
                 </Container>)
             }
         </Container>

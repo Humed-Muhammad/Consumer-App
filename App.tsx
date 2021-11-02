@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { DrawerNavigation as Authenticated } from '@Navigation/DrawerNavigation'
 import { NonAuthenticatedStackNavigation as NonAuthenticated } from '@Navigation/NonAuthenticatedStackNavigation'
 import { Provider, useSelector } from 'react-redux';
-import store from '@Redux/store';
+import { store } from '@Redux/store';
 
 const RootStack = createNativeStackNavigator()
 

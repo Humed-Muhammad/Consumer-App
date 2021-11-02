@@ -25,7 +25,9 @@ import * as yup from "yup"
 import FormError from "./FormError"
 
 
-const Location = ({ text, setIsSender, setFrom }) => {
+
+
+const Location = ({ text, setIsSender, setFrom, from }) => {
   const [checked, setChecked] = useState(false)
   const dispatch = useDispatch()
   const { pickupPlace } = useSelector((state: any) => state.pickup)
@@ -44,9 +46,27 @@ const Location = ({ text, setIsSender, setFrom }) => {
     zIndex: 100
   }
   const validationSchema = yup.object().shape({
-    senderName: yup.string().required(),
-    senderPhone: yup.number().min(10).required(),
+    name: yup.string().required(),
+    phone: yup.number().min(10).required(),
   })
+
+  const handleSubmit = (values) => {
+    dispatch(pickupToogleModal())
+    dispatch(pickupAddPickupPlace(from))
+    if (!checked) {
+      dispatch(pickupChangeIsChecked(false))
+    } else {
+      setChecked(false)
+    }
+    if (!pickupIsChecked) {
+      dispatch(handlePickupSender(values))
+    } else if (pickupIsChecked && !checked) {
+      dispatch(handlePickupSender({ name: "kira", phone: "0943645675" }))
+    } else if (pickupIsChecked && checked) {
+      dispatch(handlePickupSender(values))
+    }
+    setFrom({})
+  }
 
   return (
     <Container direction="column" width="95%" >
@@ -86,26 +106,12 @@ const Location = ({ text, setIsSender, setFrom }) => {
 
       {pickupModalStatus && <ModalView justify="flex-start" height="100%" width="100%" status={pickupModalStatus.status} onPress={() => dispatch(pickupToogleModal())}>
         <Formik
-          initialValues={{ mainLocation: "", specificLocaiton: "", senderName: "", senderPhone: "" }}
+          initialValues={{ name: "", phone: "" }}
           onSubmit={(values) => {
             console.log(values)
-            dispatch(pickupToogleModal())
-            dispatch(pickupAddPickupPlace({ mainLocation: values.mainLocation, specificLocaiton: values.specificLocaiton }))
-            if (!checked) {
-              setChecked(true)
-              dispatch(pickupChangeIsChecked("_"))
-            } else {
-              setChecked(false)
-            }
-            if (!pickupIsChecked) {
-              dispatch(handlePickupSender({ senderName: values.senderName, senderPhone: values.senderPhone }))
-            } else if (pickupIsChecked && !checked) {
-              dispatch(handlePickupSender({ senderName: "kira", senderPhone: "0943645675" }))
-            } else if (pickupIsChecked && checked) {
-              dispatch(handlePickupSender({ senderName: values.senderName, senderPhone: values.senderPhone }))
-            }
+            handleSubmit(values)
           }}
-          validationSchema={pickupIsChecked && validationSchema}
+          validationSchema={(!pickupIsChecked || checked) && validationSchema}
         >
           {({ handleSubmit, values, handleChange, errors, touched }) => (
             <Container height="100%" direction="column">
@@ -124,27 +130,27 @@ const Location = ({ text, setIsSender, setFrom }) => {
                       {
                         checked && (<Container>
                           <Container width="50%" direction="column">
-                            <Input onChangeText={handleChange("senderName")} radius="0px" borderWidth="0px" borderBottomWidth={1} placeholder="Full name" width="100%" />
-                            <FormError error={errors.senderName} touched={touched.senderName} />
+                            <Input onChangeText={handleChange("name")} radius="0px" borderWidth="0px" borderBottomWidth={1} placeholder="Full name" width="100%" />
+                            <FormError error={errors.name} touched={touched.name} />
 
                           </Container>
                           <Container width="50%" direction="column">
-                            <Input keyboardType="numeric" onChangeText={handleChange("senderPhone")} radius="0px" borderWidth="0px" borderBottomWidth={1} placeholder="Phone number" width="100%" />
-                            <FormError error={errors.senderPhone} touched={touched.senderPhone} />
+                            <Input keyboardType="numeric" onChangeText={handleChange("phone")} radius="0px" borderWidth="0px" borderBottomWidth={1} placeholder="Phone number" width="100%" />
+                            <FormError error={errors.phone} touched={touched.phone} />
                           </Container>
                         </Container>)
                       }
                     </Container>
                   ) : (
-                    <NonCheckboxInputs keyboardType="numeric" handleChange={handleChange} />
+                    <NonCheckboxInputs errors={errors} touched={touched} keyboardType="numeric" handleChange={handleChange} />
                   )
 
                 }
               </Container>
               {/* <Input width="85%" radius="0px" borderWidth="0px" borderBottomWidth={1} onChangeText={handleChange("mainLocation")} onFoucs value={values.mainLocation} placeholder="Pickup location" /> */}
               <Container justify="flex-end" height="150px" direction="column">
-                <GooglePlacesInput top={50} />
-                <Input width="85%" radius="0px" borderWidth="0px" borderBottomWidth={1} onChangeText={handleChange("specificLocaiton")} value={values.specificLocaiton} placeholder="Specific pickup location" />
+                <GooglePlacesInput from={from} setFrom={setFrom} top={50} />
+                <Input width="85%" radius="0px" borderWidth="0px" borderBottomWidth={1} onChangeText={(text) => setFrom({ ...from, specificLoaction: text })} placeholder="Specific pickup location" />
                 <Container padd="0px" width="90%" justify="flex-end">
                   <Button b="-40px" position="absolute" width="50px" height="30px" onPress={handleSubmit} text="Add" />
                 </Container>
